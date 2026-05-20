@@ -13,9 +13,12 @@ function createDefaultClauses(): ClauseItem[] {
   return DEFAULT_CLAUSES_HTML.map((html) => ({ id: uuidv4(), html }));
 }
 
+// Use a stable empty string as the SSR placeholder.
+// The real value is either rehydrated from localStorage by the persist
+// middleware, or generated on the client via the onRehydrateStorage callback.
 const initialState: QuotationState = {
-  quotationNumber: generateQuotationNumber(),
-  quotationDate: new Date().toISOString().split("T")[0],
+  quotationNumber: "",
+  quotationDate: "",
   companyId: "sukhnath",
   customCompanyName: "",
   showSecondaryContact: true,
@@ -35,6 +38,7 @@ const initialState: QuotationState = {
   watermarkImage: null,
   stampImage: null,
   previewZoom: 0.55,
+  descriptionFontSize: "base" as const,
 };
 
 interface QuotationActions {
@@ -161,8 +165,21 @@ export const useQuotationStore = create<Store>()(
         watermarkImage: state.watermarkImage,
         stampImage: state.stampImage,
         previewZoom: state.previewZoom,
+        descriptionFontSize: state.descriptionFontSize,
         savedTemplates: state.savedTemplates,
       }),
+      // Called on the client after localStorage is read.
+      // If no persisted number/date exists yet, generate fresh ones here
+      // (never during SSR) so server and client render the same empty string.
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        if (!state.quotationNumber) {
+          state.quotationNumber = generateQuotationNumber();
+        }
+        if (!state.quotationDate) {
+          state.quotationDate = new Date().toISOString().split("T")[0];
+        }
+      },
     }
   )
 );

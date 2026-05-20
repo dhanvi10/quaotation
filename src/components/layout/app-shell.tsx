@@ -9,10 +9,13 @@ import { ExportToolbar } from "@/components/layout/export-toolbar";
 export function AppShell() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
-      <ExportToolbar />
+      {/* Sticky top toolbar — hidden in print */}
+      <div className="no-print">
+        <ExportToolbar />
+      </div>
 
-      {/* App header — mobile */}
-      <header className="border-b border-border/50 bg-background/60 px-4 py-4 backdrop-blur-lg lg:hidden">
+      {/* Mobile header — hidden in print */}
+      <header className="no-print border-b border-border/50 bg-background/60 px-4 py-4 backdrop-blur-lg lg:hidden">
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -32,10 +35,11 @@ export function AppShell() {
         </motion.div>
       </header>
 
+      {/* Main two-column layout */}
       <main className="mx-auto max-w-[1800px] px-3 py-4 sm:px-4 lg:grid lg:grid-cols-[minmax(360px,440px)_1fr] lg:gap-6 lg:px-6 lg:py-6">
-        {/* Editor — mobile: preview first via order */}
-        <section className="order-2 lg:order-1 lg:max-h-[calc(100vh-4rem)] lg:overflow-y-auto lg:pr-1 custom-scrollbar">
-          <div className="hidden lg:block mb-5">
+        {/* Editor panel — mobile: below preview */}
+        <section className="no-print order-2 lg:order-1 lg:max-h-[calc(100vh-4rem)] lg:overflow-y-auto lg:pr-1 custom-scrollbar">
+          <div className="mb-5 hidden lg:block">
             <h1 className="font-display text-2xl font-extrabold tracking-tight">
               ક્વોટેશન બિલ્ડર
             </h1>
@@ -46,7 +50,7 @@ export function AppShell() {
           <EditorPanel />
         </section>
 
-        {/* Preview — mobile on top */}
+        {/* Preview panel — mobile: on top */}
         <section className="order-1 mb-4 lg:order-2 lg:sticky lg:top-16 lg:mb-0 lg:max-h-[calc(100vh-4rem)] lg:min-h-[600px]">
           <PreviewPanel />
         </section>

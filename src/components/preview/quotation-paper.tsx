@@ -3,17 +3,30 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { DgvclBadge } from "./dgvcl-badge";
-import { useQuotationStore, getCompanyDisplayName, getOfficeAddress, getSiteLocation } from "@/store/quotation-store";
+import {
+  useQuotationStore,
+  getCompanyDisplayName,
+  getOfficeAddress,
+  getSiteLocation,
+} from "@/store/quotation-store";
 import { useActiveTheme } from "@/hooks/use-theme-colors";
 import { PRIMARY_CONTACT, SUBTITLE } from "@/data/presets";
 import { formatGujaratiDate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { BorderStyle } from "@/types/quotation";
 
 function borderClass(style: BorderStyle): string {
   if (style === "double") return "border-[3px] border-double";
-  if (style === "elegant") return "border-2 border-solid shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5)]";
+  if (style === "elegant")
+    return "border-2 border-solid shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5)]";
   return "border border-solid";
 }
+
+const FONT_SIZE_MAP = {
+  sm: "text-[11px]",
+  base: "text-[13px]",
+  lg: "text-[15px]",
+} as const;
 
 export function QuotationPaper({ id }: { id?: string }) {
   const theme = useActiveTheme();
@@ -31,6 +44,7 @@ export function QuotationPaper({ id }: { id?: string }) {
   const companyLogo = useQuotationStore((s) => s.companyLogo);
   const watermarkImage = useQuotationStore((s) => s.watermarkImage);
   const stampImage = useQuotationStore((s) => s.stampImage);
+  const descriptionFontSize = useQuotationStore((s) => s.descriptionFontSize);
 
   const companyName = getCompanyDisplayName({ companyId, customCompanyName });
   const address = getOfficeAddress(state);
@@ -54,10 +68,10 @@ export function QuotationPaper({ id }: { id?: string }) {
   return (
     <article
       id={id}
-      className="quotation-paper relative mx-auto w-[210mm] min-h-[297mm] overflow-hidden print:shadow-none"
+      className="quotation-paper relative mx-auto w-[210mm] min-h-[297mm] overflow-x-hidden print:shadow-none"
       style={paperStyle}
     >
-      {/* Watermark */}
+      {/* ── Watermark ── */}
       {watermarkImage ? (
         <img
           src={watermarkImage}
@@ -75,23 +89,32 @@ export function QuotationPaper({ id }: { id?: string }) {
         />
       )}
 
+      {/* ── Inner bordered content ── */}
       <div
-        className={`relative z-10 m-3 flex min-h-[calc(297mm-24px)] flex-col ${borderClass(borderStyle)} p-5 md:p-6`}
+        className={cn(
+          "relative z-10 m-3 flex min-h-[calc(297mm-24px)] flex-col p-5 md:p-6",
+          borderClass(borderStyle)
+        )}
         style={{ borderColor: theme.primary }}
       >
-        {/* Meta row */}
-        <div className="mb-3 flex flex-wrap justify-between gap-2 font-sans text-[10px] text-slate-600">
-          <span>
+        {/* Meta row — suppressHydrationWarning because these values are
+            client-only (Zustand persist rehydrates from localStorage) */}
+        <div
+          className="mb-3 flex flex-wrap justify-between gap-2 font-sans text-[10px] text-slate-600"
+          suppressHydrationWarning
+        >
+          <span suppressHydrationWarning>
             <strong>ક્વોટે. નં:</strong> {quotationNumber}
           </span>
-          <span>
+          <span suppressHydrationWarning>
             <strong>તારીખ:</strong> {formattedDate}
           </span>
         </div>
 
-        {/* Header */}
-        <header className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_1.4fr_1fr] sm:items-start">
-          <div className="order-2 sm:order-1">
+        {/* ── Header ── */}
+        <header className="grid grid-cols-1 gap-4 overflow-visible sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)] sm:items-start">
+          {/* Left — subtitle tag */}
+          <div className="order-2 min-w-0 sm:order-1">
             <div
               className="inline-block rounded-br-2xl px-4 py-2 text-[11px] font-bold leading-snug text-white shadow-md"
               style={{ background: theme.headerGradient }}
@@ -100,18 +123,28 @@ export function QuotationPaper({ id }: { id?: string }) {
             </div>
           </div>
 
-          <div className="order-1 text-center sm:order-2">
+          {/* Center — company name + address */}
+          <div className="order-1 min-w-0 overflow-visible px-1 py-0.5 text-center sm:order-2">
             {companyLogo && (
-              <img src={companyLogo} alt="" className="mx-auto mb-2 h-14 w-auto object-contain" />
+              <img
+                src={companyLogo}
+                alt=""
+                className="mx-auto mb-2 h-14 w-auto object-contain"
+              />
             )}
-            <h1
-              className="company-gradient-text font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl"
-              style={{
-                backgroundImage: theme.headerGradient,
-              }}
-            >
-              {companyName}
-            </h1>
+            <div className="overflow-visible py-1">
+              <h1
+                className={cn(
+                  "company-gradient-text font-display font-extrabold tracking-tight",
+                  companyId === "siddheshwar"
+                    ? "text-[1.65rem] leading-[1.4] sm:text-[2rem]"
+                    : "text-[1.85rem] leading-[1.4] sm:text-[2.25rem]"
+                )}
+                style={{ backgroundImage: theme.headerGradient }}
+              >
+                {companyName}
+              </h1>
+            </div>
             <p
               className="mt-1.5 font-gujarati text-sm font-semibold leading-relaxed sm:text-base"
               style={{ color: theme.accent }}
@@ -120,22 +153,28 @@ export function QuotationPaper({ id }: { id?: string }) {
             </p>
           </div>
 
-          <div className="order-3 text-center sm:text-right">
-            <p className="font-gujarati text-sm font-bold text-slate-900">{PRIMARY_CONTACT.name}</p>
+          {/* Right — contacts + DGVCL badge */}
+          <div className="order-3 flex min-w-0 flex-col items-center gap-1 sm:items-end sm:text-right">
+            <p className="font-gujarati text-sm font-bold text-slate-900">
+              {PRIMARY_CONTACT.name}
+            </p>
             <p className="font-sans text-sm font-semibold text-slate-700">
               મો. {PRIMARY_CONTACT.phone}
             </p>
             {showSecondary && (
               <>
-                <p className="mt-1 font-gujarati text-xs font-semibold text-slate-800">
+                <p className="mt-0.5 font-gujarati text-xs font-semibold text-slate-800">
                   {secondaryName}
                 </p>
                 <p className="font-sans text-sm text-slate-600">મો. {secondaryPhone}</p>
               </>
             )}
+
+            {/* DGVCL badge — sits below contacts, right-aligned */}
             <div className="mt-2 flex justify-center sm:justify-end">
               <DgvclBadge />
             </div>
+
             {stampImage && (
               <img
                 src={stampImage}
@@ -146,7 +185,7 @@ export function QuotationPaper({ id }: { id?: string }) {
           </div>
         </header>
 
-        {/* Location glass box */}
+        {/* ── Location glass box ── */}
         <motion.div
           layout
           className="glass-location my-4 rounded-2xl px-4 py-3 sm:px-5 sm:py-4"
@@ -156,21 +195,33 @@ export function QuotationPaper({ id }: { id?: string }) {
             boxShadow: `0 8px 32px -8px ${theme.primary}33`,
           }}
         >
-          <p className="font-display text-lg font-bold leading-snug sm:text-xl" style={{ color: theme.primary }}>
+          <p
+            className="font-display text-lg font-bold leading-snug sm:text-xl"
+            style={{ color: theme.primary }}
+          >
             <span className="mr-2">સ્થળ :</span>
-            <span className="font-gujarati font-semibold" style={{ color: theme.accent }}>
+            <span
+              className="font-gujarati font-semibold"
+              style={{ color: theme.accent }}
+            >
               {site || "—"}
             </span>
           </p>
         </motion.div>
 
-        {/* Clauses */}
+        {/* ── Clauses ── */}
         <div className="flex-1 space-y-2.5" style={{ color: theme.bodyText }}>
           {clauses.map((clause, i) => {
             const text = clause.html.replace(/<[^>]+>/g, "").trim();
             if (!text) return null;
             return (
-              <div key={clause.id} className="flex gap-2 text-[13px] leading-relaxed sm:text-sm">
+              <div
+                key={clause.id}
+                className={cn(
+                  "flex gap-2 leading-relaxed",
+                  FONT_SIZE_MAP[descriptionFontSize ?? "base"]
+                )}
+              >
                 <span
                   className="mt-0.5 shrink-0 font-display text-sm font-bold"
                   style={{ color: theme.primary }}
@@ -195,13 +246,16 @@ export function QuotationPaper({ id }: { id?: string }) {
           </p>
         )}
 
-        {/* Signatures */}
+        {/* ── Signatures ── */}
         <footer className="mt-6 grid grid-cols-[1fr_3px_1fr] gap-0 pt-4">
           <div
             className="flex min-h-[72px] items-start justify-center rounded-tl-xl p-3"
             style={{ background: theme.sigBg }}
           >
-            <span className="font-display text-sm font-bold" style={{ color: theme.primary }}>
+            <span
+              className="font-display text-sm font-bold"
+              style={{ color: theme.primary }}
+            >
               કામ આપનારની સહી
             </span>
           </div>
@@ -210,7 +264,10 @@ export function QuotationPaper({ id }: { id?: string }) {
             className="flex min-h-[72px] items-start justify-center rounded-tr-xl p-3"
             style={{ background: theme.sigBg }}
           >
-            <span className="font-display text-sm font-bold" style={{ color: theme.primary }}>
+            <span
+              className="font-display text-sm font-bold"
+              style={{ color: theme.primary }}
+            >
               કામ લેનારની સહી
             </span>
           </div>

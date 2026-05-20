@@ -74,4 +74,7 @@ export interface QuotationState {
 
   // UI
   previewZoom: number;
+
+  // Typography
+  descriptionFontSize: "sm" | "base" | "lg";
 }
