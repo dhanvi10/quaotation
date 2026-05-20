@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>સુખનાથ ઈલેક્ટ્રીકલ — ક્વોટેશન જનરેટર</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="editor no-print" id="editor">
+      <header class="editor-header">
+        <h1>ક્વોટેશન બનાવો</h1>
+        <p class="editor-sub">સુખનાથ ઈલેક્ટ્રીકલ</p>
+      </header>
+
+      <section class="form-section">
+        <label for="templateStyle">ડિઝાઇન / લેઆઉટ</label>
+        <select id="templateStyle">
+          <option value="blue">નીળી બોર્ડર (ડિફોલ્ટ)</option>
+          <option value="classic">પીળી સ્થળ પટ્ટી</option>
+          <option value="bordered">બુલેટ લિસ્ટ</option>
+        </select>
+      </section>
+
+      <section class="form-section">
+        <label for="listStyle">પોઈન્ટ સ્ટાઇલ</label>
+        <select id="listStyle">
+          <option value="bullet">ડેશ (-)</option>
+          <option value="number">નંબર (૧, ૨, ૩…)</option>
+        </select>
+      </section>
+
+      <section class="form-section">
+        <label for="officeAddress">ઓફિસ સરનામું</label>
+        <select id="officeAddress"></select>
+        <input type="text" id="officeAddressCustom" class="editable-field" placeholder="અથવા અહીં લખો / સંપાદિત કરો" />
+      </section>
+
+      <section class="form-section">
+        <label for="siteLocation">સ્થળ (સાઇટ)</label>
+        <select id="siteLocation"></select>
+        <input type="text" id="siteLocationCustom" class="editable-field" placeholder="સ્થળ લખો અથવા સંપાદિત કરો" />
+      </section>
+
+      <section class="form-section">
+        <div class="section-head">
+          <label>ક્વોટેશન પોઈન્ટ્સ</label>
+          <button type="button" class="btn btn-sm" id="addClause">+ પોઈન્ટ</button>
+        </div>
+        <p class="hint">ડ્રોપડાઉનમાંથી પસંદ કરો — નીચે ટેક્સ્ટ સંપાદિત પણ કરી શકાય.</p>
+        <div id="clausesEditor"></div>
+      </section>
+
+      <section class="form-section">
+        <label for="footerNote">નીચે નોંધ (વૈકલ્પિક)</label>
+        <select id="footerNotePreset"></select>
+        <textarea id="footerNote" rows="2" class="editable-field"></textarea>
+      </section>
+
+      <section class="form-section templates">
+        <label>તૈયાર ટેમ્પલેટ</label>
+        <div class="template-btns">
+          <button type="button" class="btn btn-outline" data-template="shivay">શિવાય ગ્લોરી</button>
+          <button type="button" class="btn btn-outline" data-template="parmeshwar">પરમેશ્વર પાર્ક</button>
+          <button type="button" class="btn btn-outline" data-template="amar">અમર બિઝનેસ હબ</button>
+          <button type="button" class="btn btn-outline" data-template="underground">અંડરગ્રાઉન્ડ</button>
+        </div>
+      </section>
+
+      <div class="editor-actions">
+        <button type="button" class="btn btn-primary" id="btnPrint">પ્રિન્ટ / PDF સેવ</button>
+        <button type="button" class="btn btn-secondary" id="btnReset">રીસેટ</button>
+      </div>
+    </aside>
+
+    <main class="preview-wrap">
+      <article id="quotation" class="quotation template-blue" aria-label="ક્વોટેશન પ્રિવ્યૂ">
+        <div class="q-frame">
+          <header class="q-header">
+            <div class="q-corner-banner">ઈલેક્ટ્રીકલ એન્ડ પાવર સર્વિસ</div>
+            <div class="q-header-center">
+              <h2 class="q-company">સુખનાથ ઈલેક્ટ્રીકલ</h2>
+              <p class="q-office-address" id="previewAddress"></p>
+            </div>
+            <div class="q-header-right">
+              <p class="q-owner">મધુ જે. ભડિયાદરા</p>
+              <p class="q-phone">મો. ૯૮૯૮૫ ૬૭૪૯૨</p>
+              <p class="q-phone">૭૦૪૧૦ ૨૪૫૬૪</p>
+              <div class="q-seal" title="DGVCL Licensed Contractor">
+                <div class="q-seal-top">
+                  <span class="q-seal-dgvcl">DGVCL</span>
+                  <span class="q-lightning">⚡</span>
+                </div>
+                <p class="q-seal-text">Licence Approved<br />Electrical Contractor<br />Govt. of Gujarat</p>
+              </div>
+            </div>
+          </header>
+
+          <div class="q-location-bar">
+            <span class="q-location-label">સ્થળ :</span>
+            <span id="previewLocation"></span>
+          </div>
+
+          <div class="q-body">
+            <ol class="q-clauses" id="previewClauses"></ol>
+            <p class="q-footer-note" id="previewFooterNote"></p>
+          </div>
+
+          <footer class="q-signatures">
+            <div class="q-sig-box">
+              <span>કામ આપનારની સહી</span>
+            </div>
+            <div class="q-sig-divider"></div>
+            <div class="q-sig-box">
+              <span>કામ લેનારની સહી</span>
+            </div>
+          </footer>
+        </div>
+        <div class="q-watermark" aria-hidden="true"></div>
+      </article>
+    </main>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
