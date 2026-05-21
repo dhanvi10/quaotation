@@ -149,12 +149,24 @@ html.pdf-exporting #quotation-export-root {
 
   #print-portal .quotation-paper {
     width: 210mm !important;
+    height: 297mm !important;
     min-height: 297mm !important;
+    max-height: 297mm !important;
     transform: none !important;
     box-shadow: none !important;
     margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+  }
+
+  /* Equal margin on all 4 sides for the inner bordered div */
+  #print-portal .quotation-paper > div {
+    border-style: solid !important;
+    margin: 6mm !important;
+    min-height: calc(297mm - 12mm) !important;
+    box-sizing: border-box !important;
   }
 
   #print-portal,

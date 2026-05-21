@@ -13,9 +13,9 @@ import { cn } from "@/lib/utils";
 import type { BorderStyle } from "@/types/quotation";
 
 function borderClass(style: BorderStyle): string {
-  if (style === "double") return "border-[3px] border-double";
+  if (style === "double") return "border-[5px] border-double";
   if (style === "elegant")
-    return "border-2 border-solid shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5)]";
+    return "border-4 border-solid shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5)]";
   return "border border-solid";
 }
 
@@ -66,23 +66,63 @@ export function QuotationPaper({ id }: { id?: string }) {
           className="pointer-events-none absolute inset-0 z-0 h-full w-full object-contain opacity-[0.06]"
         />
       ) : (
-        <div
-          className="pointer-events-none absolute bottom-[18%] right-[12%] z-0 h-48 w-24 opacity-[0.05]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 120'%3E%3Crect x='27' y='0' width='6' height='100' fill='${encodeURIComponent(theme.primary)}'/%3E%3Cline x1='0' y1='18' x2='60' y2='18' stroke='${encodeURIComponent(theme.primary)}' stroke-width='3'/%3E%3Cline x1='5' y1='38' x2='55' y2='38' stroke='${encodeURIComponent(theme.primary)}' stroke-width='3'/%3E%3C/svg%3E")`,
-            backgroundSize: "contain",
-            backgroundRepeat: "no-repeat",
-          }}
-        />
+        <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center opacity-[0.06]">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="-500 96 900 250"
+            className="h-full w-full"
+            aria-hidden="true"
+          >
+            {/* Background diagonal lines */}
+            <g fill="none" strokeLinecap="round">
+              <g stroke={theme.primary} strokeWidth="1.5" opacity="0.4">
+                <line x1="-50" y1="200" x2="450" y2="-50" />
+                <line x1="-50" y1="260" x2="450" y2="10" />
+                <line x1="-50" y1="320" x2="450" y2="70" />
+                <line x1="-50" y1="380" x2="450" y2="130" />
+                <line x1="-50" y1="440" x2="450" y2="190" />
+                <line x1="-50" y1="500" x2="450" y2="250" />
+                <line x1="-50" y1="560" x2="450" y2="310" />
+                <line x1="-50" y1="620" x2="450" y2="370" />
+                <line x1="-50" y1="680" x2="450" y2="430" />
+              </g>
+              {/* Central vertical pole */}
+              <line x1="200" y1="260" x2="200" y2="680" stroke={theme.primary} strokeWidth="26" />
+              {/* Top slanted crossbar */}
+              <line x1="100" y1="510" x2="310" y2="405" stroke={theme.primary} strokeWidth="26" />
+              {/* Bottom slanted crossbar */}
+              <line x1="100" y1="615" x2="310" y2="510" stroke={theme.primary} strokeWidth="26" />
+              {/* Top crossbar pins */}
+              <g stroke={theme.primary} strokeWidth="12">
+                <line x1="125" y1="480" x2="125" y2="497" />
+                <line x1="165" y1="460" x2="165" y2="478" />
+                <line x1="240" y1="422" x2="240" y2="440" />
+                <line x1="280" y1="402" x2="280" y2="420" />
+              </g>
+              {/* Bottom crossbar pins */}
+              <g stroke={theme.primary} strokeWidth="12">
+                <line x1="125" y1="585" x2="125" y2="602" />
+                <line x1="165" y1="565" x2="165" y2="583" />
+                <line x1="240" y1="527" x2="240" y2="545" />
+                <line x1="280" y1="507" x2="280" y2="525" />
+              </g>
+            </g>
+          </svg>
+        </div>
       )}
 
       {/* ── Inner bordered content ── */}
       <div
         className={cn(
-          "relative z-10 m-3 flex min-h-[calc(297mm-24px)] flex-col p-5",
+          "relative z-10 flex flex-col p-5",
           borderClass(borderStyle)
         )}
-        style={{ borderColor: theme.primary }}
+        style={{
+          borderColor: theme.primary,
+          margin: "6mm",
+          minHeight: "calc(297mm - 12mm)",
+          boxSizing: "border-box",
+        }}
       >
         {/* ── Header ─────────────────────────────────────────────────────────
             Layout matches reference:
