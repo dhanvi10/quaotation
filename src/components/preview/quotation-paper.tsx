@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { motion } from "framer-motion";
 import { DgvclBadge } from "./dgvcl-badge";
 import {
   useQuotationStore,
@@ -92,13 +91,12 @@ export function QuotationPaper({ id }: { id?: string }) {
       {/* ── Inner bordered content ── */}
       <div
         className={cn(
-          "relative z-10 m-3 flex min-h-[calc(297mm-24px)] flex-col p-5 md:p-6",
+          "relative z-10 m-3 flex min-h-[calc(297mm-24px)] flex-col p-5",
           borderClass(borderStyle)
         )}
         style={{ borderColor: theme.primary }}
       >
-        {/* Meta row — suppressHydrationWarning because these values are
-            client-only (Zustand persist rehydrates from localStorage) */}
+        {/* ── Meta row ── */}
         <div
           className="mb-3 flex flex-wrap justify-between gap-2 font-sans text-[10px] text-slate-600"
           suppressHydrationWarning
@@ -111,10 +109,13 @@ export function QuotationPaper({ id }: { id?: string }) {
           </span>
         </div>
 
-        {/* ── Header ── */}
-        <header className="grid grid-cols-1 gap-4 overflow-visible sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)] sm:items-start">
-          {/* Left — subtitle tag */}
-          <div className="order-2 min-w-0 sm:order-1">
+        {/* ── Header — 3-column grid, NO responsive breakpoints (must work at print width) ── */}
+        <header
+          className="grid gap-3"
+          style={{ gridTemplateColumns: "minmax(0,1fr) minmax(0,1.5fr) minmax(0,1fr)", alignItems: "start" }}
+        >
+          {/* Col 1 — subtitle tag */}
+          <div className="min-w-0 self-start">
             <div
               className="inline-block rounded-br-2xl px-4 py-2 text-[11px] font-bold leading-snug text-white shadow-md"
               style={{ background: theme.headerGradient }}
@@ -123,8 +124,8 @@ export function QuotationPaper({ id }: { id?: string }) {
             </div>
           </div>
 
-          {/* Center — company name + address */}
-          <div className="order-1 min-w-0 overflow-visible px-1 py-0.5 text-center sm:order-2">
+          {/* Col 2 — company name + address */}
+          <div className="min-w-0 overflow-visible px-1 text-center">
             {companyLogo && (
               <img
                 src={companyLogo}
@@ -132,29 +133,26 @@ export function QuotationPaper({ id }: { id?: string }) {
                 className="mx-auto mb-2 h-14 w-auto object-contain"
               />
             )}
-            <div className="overflow-visible py-1">
-              <h1
-                className={cn(
-                  "company-gradient-text font-display font-extrabold tracking-tight",
-                  companyId === "siddheshwar"
-                    ? "text-[1.65rem] leading-[1.4] sm:text-[2rem]"
-                    : "text-[1.85rem] leading-[1.4] sm:text-[2.25rem]"
-                )}
-                style={{ backgroundImage: theme.headerGradient }}
-              >
-                {companyName}
-              </h1>
-            </div>
+            <h1
+              className="company-gradient-text font-display font-extrabold tracking-tight"
+              style={{
+                backgroundImage: theme.headerGradient,
+                fontSize: "1.75rem",
+                lineHeight: 1.4,
+              }}
+            >
+              {companyName}
+            </h1>
             <p
-              className="mt-1.5 font-gujarati text-sm font-semibold leading-relaxed sm:text-base"
-              style={{ color: theme.accent }}
+              className="mt-1.5 font-gujarati font-semibold leading-relaxed"
+              style={{ color: theme.accent, fontSize: "0.8rem" }}
             >
               {address}
             </p>
           </div>
 
-          {/* Right — contacts + DGVCL badge */}
-          <div className="order-3 flex min-w-0 flex-col items-center gap-1 sm:items-end sm:text-right">
+          {/* Col 3 — contacts + DGVCL badge */}
+          <div className="flex min-w-0 flex-col items-end gap-1 text-right">
             <p className="font-gujarati text-sm font-bold text-slate-900">
               {PRIMARY_CONTACT.name}
             </p>
@@ -169,12 +167,9 @@ export function QuotationPaper({ id }: { id?: string }) {
                 <p className="font-sans text-sm text-slate-600">મો. {secondaryPhone}</p>
               </>
             )}
-
-            {/* DGVCL badge — sits below contacts, right-aligned */}
-            <div className="mt-2 flex justify-center sm:justify-end">
+            <div className="mt-2 flex justify-end">
               <DgvclBadge />
             </div>
-
             {stampImage && (
               <img
                 src={stampImage}
@@ -186,9 +181,8 @@ export function QuotationPaper({ id }: { id?: string }) {
         </header>
 
         {/* ── Location glass box ── */}
-        <motion.div
-          layout
-          className="glass-location my-4 rounded-2xl px-4 py-3 sm:px-5 sm:py-4"
+        <div
+          className="glass-location my-4 rounded-2xl px-5 py-3"
           style={{
             background: theme.locationBg,
             border: `2px solid ${theme.locationBorder}`,
@@ -196,18 +190,15 @@ export function QuotationPaper({ id }: { id?: string }) {
           }}
         >
           <p
-            className="font-display text-lg font-bold leading-snug sm:text-xl"
+            className="font-display text-lg font-bold leading-snug"
             style={{ color: theme.primary }}
           >
             <span className="mr-2">સ્થળ :</span>
-            <span
-              className="font-gujarati font-semibold"
-              style={{ color: theme.accent }}
-            >
+            <span className="font-gujarati font-semibold" style={{ color: theme.accent }}>
               {site || "—"}
             </span>
           </p>
-        </motion.div>
+        </div>
 
         {/* ── Clauses ── */}
         <div className="flex-1 space-y-2.5" style={{ color: theme.bodyText }}>
@@ -252,10 +243,7 @@ export function QuotationPaper({ id }: { id?: string }) {
             className="flex min-h-[72px] items-start justify-center rounded-tl-xl p-3"
             style={{ background: theme.sigBg }}
           >
-            <span
-              className="font-display text-sm font-bold"
-              style={{ color: theme.primary }}
-            >
+            <span className="font-display text-sm font-bold" style={{ color: theme.primary }}>
               કામ આપનારની સહી
             </span>
           </div>
@@ -264,10 +252,7 @@ export function QuotationPaper({ id }: { id?: string }) {
             className="flex min-h-[72px] items-start justify-center rounded-tr-xl p-3"
             style={{ background: theme.sigBg }}
           >
-            <span
-              className="font-display text-sm font-bold"
-              style={{ color: theme.primary }}
-            >
+            <span className="font-display text-sm font-bold" style={{ color: theme.primary }}>
               કામ લેનારની સહી
             </span>
           </div>

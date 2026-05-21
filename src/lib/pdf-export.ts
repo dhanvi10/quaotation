@@ -1,67 +1,70 @@
 "use client";
 
+import {
+  prepareCloneForCanvas,
+  waitForExportReady,
+  withPreviewAtFullScale,
+} from "@/lib/export-utils";
+
+const A4_WIDTH_PX = 794;
+
 /**
- * Exports the quotation paper as a high-quality A4 PDF.
- * Targets #quotation-print-root — the isolated printable element.
+ * Export quotation PDF — pixel-perfect match to live preview.
+ * Captures #quotation-print-root at 100% scale (no zoom transform).
  */
 export async function exportQuotationPdf(): Promise<void> {
-  const root = document.getElementById("quotation-print-root");
-  if (!root) {
-    throw new Error("Quotation preview element (#quotation-print-root) not found.");
-  }
+  await withPreviewAtFullScale(async () => {
+    await waitForExportReady();
 
-  // Grab the inner .quotation-paper element for accurate sizing
-  const paper =
-    (root.querySelector(".quotation-paper") as HTMLElement | null) ?? root;
+    // Target the single live preview paper — ExportMirror has been removed
+    const root = document.getElementById("quotation-print-root");
+    if (!root) {
+      throw new Error("Quotation element not found for PDF export.");
+    }
 
-  const html2pdf = (await import("html2pdf.js")).default;
+    const paper =
+      (root.querySelector(".quotation-paper") as HTMLElement | null) ?? root;
 
-  // Derive filename from company heading
-  const companyEl = paper.querySelector("h1");
-  const companyName = companyEl?.textContent?.trim() || "quotation";
-  const safeFilename = companyName.replace(/[^\w\s-]/g, "").trim() || "quotation";
+    const html2pdf = (await import("html2pdf.js")).default;
 
-  const opt = {
-    margin: [0, 0, 0, 0] as [number, number, number, number],
-    filename: `${safeFilename}-quotation.pdf`,
-    image: { type: "jpeg" as const, quality: 0.99 },
-    html2canvas: {
-      scale: 3,                  // Higher DPI for crisp Gujarati text
-      useCORS: true,
-      allowTaint: true,
-      letterRendering: true,
-      logging: false,
-      backgroundColor: "#ffffff",
-      windowWidth: 794,          // ~210mm at 96dpi
-      windowHeight: 1123,        // ~297mm at 96dpi
-      scrollX: 0,
-      scrollY: 0,
-      onclone: (clonedDoc: Document) => {
-        // Ensure cloned element has no transform scale applied
-        const clonedPaper = clonedDoc.querySelector(
-          ".quotation-paper"
-        ) as HTMLElement | null;
-        if (clonedPaper) {
-          clonedPaper.style.transform = "none";
-          clonedPaper.style.width = "210mm";
-          clonedPaper.style.minHeight = "297mm";
-        }
+    const companyEl = paper.querySelector("h1");
+    const companyName = companyEl?.textContent?.trim() || "quotation";
+    const safeFilename =
+      companyName.replace(/[^\w\u0A80-\u0AFF\s-]/g, "").trim() || "quotation";
+
+    const width = Math.max(paper.offsetWidth, paper.scrollWidth, A4_WIDTH_PX);
+    const height = Math.max(paper.offsetHeight, paper.scrollHeight, 1123);
+
+    const opt = {
+      margin: 0,
+      filename: `${safeFilename}-quotation.pdf`,
+      image: { type: "jpeg" as const, quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+        width,
+        height,
+        windowWidth: width,
+        windowHeight: height,
+        scrollX: 0,
+        scrollY: -window.scrollY,
+        x: 0,
+        y: 0,
+        onclone: (clonedDoc: Document) => {
+          prepareCloneForCanvas(clonedDoc, paper);
+        },
       },
-    },
-    jsPDF: {
-      unit: "mm" as const,
-      format: "a4" as const,
-      orientation: "portrait" as const,
-      compress: true,
-    },
-    pagebreak: {
-      mode: ["css", "legacy"] as string[],
-      avoid: [".quotation-paper"],
-    },
-  };
+      jsPDF: {
+        unit: "mm" as const,
+        format: "a4" as const,
+        orientation: "portrait" as const,
+      },
+      pagebreak: { mode: ["avoid-all"] as string[] },
+    };
 
-  await html2pdf()
-    .set(opt as Record<string, unknown>)
-    .from(paper)
-    .save();
+    await html2pdf().set(opt as Record<string, unknown>).from(paper).save();
+  });
 }

@@ -63,6 +63,23 @@
   font-family: var(--font-noto-gujarati), sans-serif;
 }
 
+/* A4 header — always 3 columns (not viewport-dependent) */
+.quotation-paper .q-header-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+/* During PDF export: no zoom, full opacity capture */
+html.pdf-exporting .preview-zoom-wrapper {
+  transform: none !important;
+  margin-bottom: 0 !important;
+}
+
+html.pdf-exporting #quotation-print-root,
+html.pdf-exporting #quotation-export-root {
+  transform: none !important;
+}
+
 .quotation-paper .clause-content p {
   margin: 0 0 0.35rem;
   line-height: 1.65;
@@ -95,69 +112,82 @@
   pointer-events: none;
 }
 
-/* Print */
+/* ── Print ──────────────────────────────────────────────────────────────────
+   Strategy: hide the entire page, then show ONLY #quotation-print-root.
+   The paper renders at true A4 size with no transforms.
+   ────────────────────────────────────────────────────────────────────────── */
 @media print {
   @page {
-    size: A4;
-    margin: 0;
+    size: A4 portrait;
+    margin: 0mm;
   }
 
-  /* Hide everything by default */
-  body > * {
-    display: none !important;
-  }
-
-  /* The Next.js root div wraps everything — hide its children */
-  #__next > *,
-  body > div > * {
-    display: none !important;
-  }
-
-  /* Utility class — explicitly hide elements in print */
-  .no-print {
-    display: none !important;
-  }
-
-  /* Show only the print root and its descendants */
-  #quotation-print-root {
-    display: block !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 210mm !important;
-    min-height: 297mm !important;
-    transform: none !important;
-    box-shadow: none !important;
-    overflow: visible !important;
-    z-index: 9999 !important;
-  }
-
-  #quotation-print-root * {
-    display: revert !important;
-  }
-
-  body {
+  /* 1. Nuke everything on the page */
+  html, body {
     background: white !important;
     margin: 0 !important;
     padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
   }
 
-  /* Remove scale transforms on the paper */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* 2. Make only the single print root and its children visible */
+  #quotation-print-root,
+  #quotation-print-root * {
+    visibility: visible !important;
+  }
+
+  /* Ensure the export mirror and any other paper copies stay hidden */
+  #quotation-export-mount,
+  #quotation-export-mount * {
+    visibility: hidden !important;
+    display: none !important;
+  }
+
+  /* 3. Position the print root to fill the page exactly */
+  #quotation-print-root {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    z-index: 99999 !important;
+    background: white !important;
+  }
+
+  /* 4. The paper itself — exact A4, no transforms, no shadows */
   .quotation-paper {
     width: 210mm !important;
     min-height: 297mm !important;
     transform: none !important;
     box-shadow: none !important;
     margin: 0 !important;
-    page-break-inside: avoid;
-    break-inside: avoid;
+    padding: 0 !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
-  /* Force color printing */
+  /* 5. Force color/gradient printing */
   #quotation-print-root,
   #quotation-print-root * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* 6. Remove any preview zoom transform from the wrapper */
+  .preview-zoom-wrapper {
+    transform: none !important;
+    margin-bottom: 0 !important;
+    width: 210mm !important;
   }
 }
 

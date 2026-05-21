@@ -36,7 +36,7 @@ export function PreviewPanel() {
         */}
         <motion.div
           layout
-          className="mx-auto origin-top transition-transform duration-300"
+          className="preview-zoom-wrapper mx-auto origin-top transition-transform duration-300"
           style={{
             transform: `scale(${previewZoom})`,
             width: "210mm",
