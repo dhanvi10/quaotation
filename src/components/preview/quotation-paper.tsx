@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { DgvclBadge } from "./dgvcl-badge";
 import {
   useQuotationStore,
@@ -9,8 +8,7 @@ import {
   getSiteLocation,
 } from "@/store/quotation-store";
 import { useActiveTheme } from "@/hooks/use-theme-colors";
-import { PRIMARY_CONTACT, SUBTITLE } from "@/data/presets";
-import { formatGujaratiDate } from "@/lib/utils";
+import { PRIMARY_CONTACT } from "@/data/presets";
 import { cn } from "@/lib/utils";
 import type { BorderStyle } from "@/types/quotation";
 
@@ -38,8 +36,6 @@ export function QuotationPaper({ id }: { id?: string }) {
   const state = useQuotationStore();
   const clauses = useQuotationStore((s) => s.clauses);
   const footerNote = useQuotationStore((s) => s.footerNote);
-  const quotationNumber = useQuotationStore((s) => s.quotationNumber);
-  const quotationDate = useQuotationStore((s) => s.quotationDate);
   const companyLogo = useQuotationStore((s) => s.companyLogo);
   const watermarkImage = useQuotationStore((s) => s.watermarkImage);
   const stampImage = useQuotationStore((s) => s.stampImage);
@@ -48,14 +44,6 @@ export function QuotationPaper({ id }: { id?: string }) {
   const companyName = getCompanyDisplayName({ companyId, customCompanyName });
   const address = getOfficeAddress(state);
   const site = getSiteLocation(state);
-
-  const formattedDate = useMemo(() => {
-    try {
-      return formatGujaratiDate(new Date(quotationDate));
-    } catch {
-      return quotationDate;
-    }
-  }, [quotationDate]);
 
   const paperStyle = {
     "--q-primary": theme.primary,
@@ -96,36 +84,48 @@ export function QuotationPaper({ id }: { id?: string }) {
         )}
         style={{ borderColor: theme.primary }}
       >
-        {/* ── Meta row ── */}
-        <div
-          className="mb-3 flex flex-wrap justify-between gap-2 font-sans text-[10px] text-slate-600"
-          suppressHydrationWarning
-        >
-          <span suppressHydrationWarning>
-            <strong>ક્વોટે. નં:</strong> {quotationNumber}
-          </span>
-          <span suppressHydrationWarning>
-            <strong>તારીખ:</strong> {formattedDate}
-          </span>
-        </div>
-
-        {/* ── Header — 3-column grid, NO responsive breakpoints (must work at print width) ── */}
+        {/* ── Header ─────────────────────────────────────────────────────────
+            Layout matches reference:
+            [Left: name + phones]  [Center: logo + company + address]  [Right: DGVCL badge]
+        ──────────────────────────────────────────────────────────────────── */}
         <header
-          className="grid gap-3"
-          style={{ gridTemplateColumns: "minmax(0,1fr) minmax(0,1.5fr) minmax(0,1fr)", alignItems: "start" }}
+          className="grid items-start gap-3"
+          style={{ gridTemplateColumns: "minmax(0,auto) minmax(0,2fr) minmax(0,auto)" }}
         >
-          {/* Col 1 — subtitle tag */}
-          <div className="min-w-0 self-start">
-            <div
-              className="inline-block rounded-br-2xl px-4 py-2 text-[11px] font-bold leading-snug text-white shadow-md"
-              style={{ background: theme.headerGradient }}
+          {/* Col 1 — primary contact name + phones */}
+          <div className="flex flex-col gap-0.5 pt-1">
+            <p
+              className="font-gujarati font-bold leading-snug"
+              style={{ color: theme.primary, fontSize: "0.85rem" }}
             >
-              {SUBTITLE}
-            </div>
+              {PRIMARY_CONTACT.name}
+            </p>
+            <p
+              className="font-sans font-semibold tabular-nums"
+              style={{ color: theme.primary, fontSize: "0.82rem" }}
+            >
+              મો. {PRIMARY_CONTACT.phone}
+            </p>
+            {showSecondary && (
+              <>
+                <p
+                  className="mt-1 font-gujarati font-semibold leading-snug"
+                  style={{ color: theme.primary, fontSize: "0.82rem" }}
+                >
+                  {secondaryName}
+                </p>
+                <p
+                  className="font-sans font-semibold tabular-nums"
+                  style={{ color: theme.primary, fontSize: "0.82rem" }}
+                >
+                  મો. {secondaryPhone}
+                </p>
+              </>
+            )}
           </div>
 
-          {/* Col 2 — company name + address */}
-          <div className="min-w-0 overflow-visible px-1 text-center">
+          {/* Col 2 — logo (optional) + company name + address */}
+          <div className="flex flex-col items-center text-center">
             {companyLogo && (
               <img
                 src={companyLogo}
@@ -137,52 +137,41 @@ export function QuotationPaper({ id }: { id?: string }) {
               className="company-gradient-text font-display font-extrabold tracking-tight"
               style={{
                 backgroundImage: theme.headerGradient,
-                fontSize: "1.75rem",
-                lineHeight: 1.4,
+                fontSize: "3rem",
               }}
             >
               {companyName}
             </h1>
             <p
-              className="mt-1.5 font-gujarati font-semibold leading-relaxed"
-              style={{ color: theme.accent, fontSize: "0.8rem" }}
+              className="mt-1 font-gujarati font-semibold leading-relaxed"
+              style={{ color: theme.accent, fontSize: "0.82rem" }}
             >
               {address}
             </p>
           </div>
 
-          {/* Col 3 — contacts + DGVCL badge */}
-          <div className="flex min-w-0 flex-col items-end gap-1 text-right">
-            <p className="font-gujarati text-sm font-bold text-slate-900">
-              {PRIMARY_CONTACT.name}
-            </p>
-            <p className="font-sans text-sm font-semibold text-slate-700">
-              મો. {PRIMARY_CONTACT.phone}
-            </p>
-            {showSecondary && (
-              <>
-                <p className="mt-0.5 font-gujarati text-xs font-semibold text-slate-800">
-                  {secondaryName}
-                </p>
-                <p className="font-sans text-sm text-slate-600">મો. {secondaryPhone}</p>
-              </>
-            )}
-            <div className="mt-2 flex justify-end">
-              <DgvclBadge />
-            </div>
+          {/* Col 3 — DGVCL badge + optional stamp */}
+          <div className="flex flex-col items-end gap-2 pt-1">
+            <DgvclBadge />
             {stampImage && (
               <img
                 src={stampImage}
                 alt="stamp"
-                className="mt-2 ml-auto h-16 w-16 object-contain opacity-90"
+                className="h-14 w-14 object-contain opacity-90"
               />
             )}
           </div>
         </header>
 
+        {/* ── Divider under header ── */}
+        <div
+          className="my-3 h-[2px] w-full rounded-full opacity-20"
+          style={{ background: theme.primary }}
+        />
+
         {/* ── Location glass box ── */}
         <div
-          className="glass-location my-4 rounded-2xl px-5 py-3"
+          className="glass-location rounded-2xl px-5 py-3"
           style={{
             background: theme.locationBg,
             border: `2px solid ${theme.locationBorder}`,
@@ -201,7 +190,7 @@ export function QuotationPaper({ id }: { id?: string }) {
         </div>
 
         {/* ── Clauses ── */}
-        <div className="flex-1 space-y-2.5" style={{ color: theme.bodyText }}>
+        <div className="mt-3 flex-1 space-y-2.5" style={{ color: theme.bodyText }}>
           {clauses.map((clause, i) => {
             const text = clause.html.replace(/<[^>]+>/g, "").trim();
             if (!text) return null;

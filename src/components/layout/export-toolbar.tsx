@@ -48,7 +48,46 @@ export function ExportToolbar() {
   };
 
   const handlePrint = () => {
-    window.print();
+    // 1. Get the live paper element
+    const source = document.getElementById("quotation-print-root");
+    if (!source) return;
+
+    // 2. Remove any existing portal
+    document.getElementById("print-portal")?.remove();
+
+    // 3. Create a top-level portal div — direct child of <body>
+    //    so `body > *` CSS hides everything else cleanly
+    const portal = document.createElement("div");
+    portal.id = "print-portal";
+
+    // 4. Deep-clone the paper HTML into the portal
+    portal.innerHTML = source.innerHTML;
+
+    // 5. Copy all inline styles from the live paper to the clone
+    //    (theme colors are set as inline style vars on .quotation-paper)
+    const livePaper = source.querySelector<HTMLElement>(".quotation-paper");
+    const clonePaper = portal.querySelector<HTMLElement>(".quotation-paper");
+    if (livePaper && clonePaper) {
+      clonePaper.setAttribute("style", livePaper.getAttribute("style") ?? "");
+      // Remove any transform/zoom that the preview wrapper may have applied
+      clonePaper.style.transform = "none";
+      clonePaper.style.width = "210mm";
+      clonePaper.style.minHeight = "297mm";
+      clonePaper.style.margin = "0";
+      clonePaper.style.boxShadow = "none";
+    }
+
+    // 6. Append to body and print
+    document.body.appendChild(portal);
+
+    // Small delay so the browser paints the portal before opening print dialog
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.print();
+        // 7. Clean up after dialog closes
+        document.getElementById("print-portal")?.remove();
+      });
+    });
   };
 
   return (

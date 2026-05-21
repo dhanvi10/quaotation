@@ -7,7 +7,6 @@ import {
   MapPin,
   Palette,
   Phone,
-  Settings2,
   ImageIcon,
   Type,
   Plus,
@@ -237,8 +236,6 @@ export function EditorPanel() {
   useEffect(() => setMounted(true), []);
 
   const setField = useQuotationStore((s) => s.setField);
-  const quotationNumber = useQuotationStore((s) => s.quotationNumber);
-  const quotationDate = useQuotationStore((s) => s.quotationDate);
   const companyId = useQuotationStore((s) => s.companyId);
   const customCompanyName = useQuotationStore((s) => s.customCompanyName);
   const showSecondaryContact = useQuotationStore((s) => s.showSecondaryContact);
@@ -273,28 +270,7 @@ export function EditorPanel() {
 
   return (
     <div className="space-y-5 pb-32 lg:pb-8">
-      {/* ── Quotation meta ── */}
-      <Section icon={Settings2} title="ક્વોટેશન વિગત" description="નંબર અને તારીખ">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label>ક્વોટેશન નંબર</Label>
-            <Input
-              value={quotationNumber}
-              onChange={(e) => setField("quotationNumber", e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>તારીખ</Label>
-            <Input
-              type="date"
-              value={quotationDate}
-              onChange={(e) => setField("quotationDate", e.target.value)}
-            />
-          </div>
-        </div>
-      </Section>
-
-      {/* ── Company ── */}
+      {/* ── Contact ── */}
       <Section icon={Building2} title="કંપની" description="નામ અને લોગો">
         <div className="space-y-3">
           <Label>કંપની પસંદ કરો</Label>
