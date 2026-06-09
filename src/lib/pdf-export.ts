@@ -78,8 +78,9 @@ export async function exportQuotationPdf(): Promise<void> {
       if (device.isIOS) {
         // iOS: open in new tab
         const pdfDataUrl = pdf.output("bloburi");
+
         const link = document.createElement("a");
-        link.href = pdfDataUrl as string;
+        link.href = pdfDataUrl.toString();
         link.target = "_blank";
         link.rel = "noopener noreferrer";
         document.body.appendChild(link);
