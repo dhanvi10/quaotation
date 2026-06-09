@@ -47,22 +47,35 @@ export async function exportQuotationPdf(): Promise<void> {
       companyName.replace(/[^\w\u0A80-\u0AFF\s-]/g, "").trim() || "quotation";
 
     try {
-      // Convert HTML to PNG image with high quality for sharp text
-      const scale = device.isMobile ? 3 : 3.5;
+      // Convert HTML to PNG image with proper scaling for PDF embedding
+      // Lower pixelRatio to prevent oversized images on mobile
+      const scale = device.isMobile ? 1.5 : 2;
       const pngDataUrl = await toPng(paper, {
         cacheBust: true,
         pixelRatio: scale,
         backgroundColor: "#ffffff",
-        quality: 1,
+        quality: 0.98,
       });
 
       // Import jsPDF dynamically
       const { jsPDF } = await import("jspdf");
 
-      // Get actual dimensions of the paper element
-      const rect = paper.getBoundingClientRect();
-      const pdfWidth = 210; // A4 width in mm
-      const pdfHeight = (rect.height / rect.width) * pdfWidth; // Calculate height maintaining aspect ratio
+      // Get the actual rendered size from the element (not scaled, actual DOM size)
+      const paperWidth = paper.offsetWidth; // Original element width in pixels
+      const paperHeight = paper.offsetHeight; // Original element height in pixels
+
+      // A4 dimensions in mm
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+
+      // Calculate the aspect ratio from the actual paper element
+      const aspectRatio = paperHeight / paperWidth;
+      
+      // Calculate PDF image height maintaining aspect ratio
+      const calculatedHeight = pdfWidth * aspectRatio;
+      
+      // Ensure height doesn't exceed A4 page height
+      const finalHeight = Math.min(calculatedHeight, pdfHeight);
 
       // Create PDF with A4 size
       const pdf = new jsPDF({
@@ -71,8 +84,8 @@ export async function exportQuotationPdf(): Promise<void> {
         format: "a4",
       });
 
-      // Add image to PDF (fills the page)
-      pdf.addImage(pngDataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
+      // Add image to PDF centered and properly sized
+      pdf.addImage(pngDataUrl, "PNG", 0, 0, pdfWidth, finalHeight);
 
       // Handle download based on device
       if (device.isIOS) {

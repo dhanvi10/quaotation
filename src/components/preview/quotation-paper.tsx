@@ -215,7 +215,6 @@ export function QuotationPaper({ id }: { id?: string }) {
           style={{
             background: theme.locationBg,
             border: `2px solid ${theme.locationBorder}`,
-            boxShadow: `0 8px 32px -8px ${theme.primary}33`,
           }}
         >
           <p

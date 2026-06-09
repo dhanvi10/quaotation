@@ -39,8 +39,6 @@ export function DgvclBadge({ scale = 1 }: DgvclBadgeProps) {
           background:
             "linear-gradient(160deg, #fffdf0 0%, #fef3c7 35%, #fde68a 65%, #fbbf24 100%)",
           border: "2px solid #d97706",
-          boxShadow:
-            "0 0 0 1px rgba(251,191,36,0.45), 0 0 0 3px rgba(217,119,6,0.12), 0 6px 20px rgba(180,83,9,0.28)",
           padding: "6px 4px",
         }}
       >
