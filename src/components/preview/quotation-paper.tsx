@@ -55,7 +55,7 @@ export function QuotationPaper({ id }: { id?: string }) {
   return (
     <article
       id={id}
-      className="quotation-paper relative mx-auto w-[210mm] min-h-[297mm] overflow-x-hidden print:shadow-none"
+      className="quotation-paper relative mx-auto w-[210mm] overflow-x-hidden print:shadow-none"
       style={paperStyle}
     >
       {/* ── Watermark ── */}
@@ -230,7 +230,7 @@ export function QuotationPaper({ id }: { id?: string }) {
         </div>
 
         {/* ── Clauses ── */}
-        <div className="mt-3 flex-1 space-y-2.5" style={{ color: theme.bodyText }}>
+        <div className="mt-8 flex-1 space-y-2.5" style={{ color: theme.bodyText }}>
           {clauses.map((clause, i) => {
             const text = clause.html.replace(/<[^>]+>/g, "").trim();
             if (!text) return null;

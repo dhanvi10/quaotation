@@ -4,25 +4,37 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+     --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 222.2 84% 4.9%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 222.2 84% 4.9%;
+
     --primary: 221 83% 53%;
     --primary-foreground: 210 40% 98%;
+
     --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
+
     --accent: 210 40% 96%;
     --accent-foreground: 222 47% 11%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+
     --border: 214 32% 91%;
     --input: 214 32% 91%;
     --ring: 221 83% 53%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
     --radius: 1rem;
   }
 
@@ -113,8 +125,8 @@ html.pdf-exporting #quotation-export-root {
 }
 
 /* ── Print ──────────────────────────────────────────────────────────────────
-   The JS print handler clones the paper into #print-portal before calling
-   window.print(). This CSS then hides everything except that portal.
+   The JS print handler opens print page in new window. This CSS ensures
+   proper rendering on desktop and mobile devices.
    ────────────────────────────────────────────────────────────────────────── */
 @media print {
   @page {
@@ -127,6 +139,8 @@ html.pdf-exporting #quotation-export-root {
     background: white !important;
     margin: 0 !important;
     padding: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
   }
 
   /* Hide the entire app */
@@ -134,53 +148,111 @@ html.pdf-exporting #quotation-export-root {
     display: none !important;
   }
 
-  /* Show only the dedicated print portal */
-  #print-portal {
+  /* Show only the print page root on mobile/desktop */
+  .print-page-root {
     display: block !important;
-    position: fixed !important;
-    inset: 0 !important;
+    position: static !important;
     width: 210mm !important;
-    min-height: 297mm !important;
+    height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;
     z-index: 99999 !important;
   }
 
-  #print-portal .quotation-paper {
+  #quotation-print-root {
+    display: block !important;
     width: 210mm !important;
-    height: 297mm !important;
-    min-height: 297mm !important;
-    max-height: 297mm !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  /* Show only the legacy print portal for backwards compatibility */
+  #print-portal {
+    display: block !important;
+    position: relative !important;
+    width: 210mm !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    z-index: 99999 !important;
+  }
+
+  #print-portal .quotation-paper,
+  .print-page-root .quotation-paper,
+  .quotation-paper {
+    width: 210mm !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
     transform: none !important;
     box-shadow: none !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
 
   /* Equal margin on all 4 sides for the inner bordered div */
-  #print-portal .quotation-paper > div {
+  #print-portal .quotation-paper > div,
+  .print-page-root .quotation-paper > div {
     border-style: solid !important;
     margin: 6mm !important;
-    min-height: calc(297mm - 12mm) !important;
+    height: auto !important;
     box-sizing: border-box !important;
   }
 
   #print-portal,
-  #print-portal * {
+  #print-portal *,
+  .print-page-root,
+  .print-page-root * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
   }
-}
 
-/* Glass location box */
-.glass-location {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* PDF exporting: solid color for company title instead of gradient */
+  .pdf-exporting .pdf-company-title {
+    background: none !important;
+    background-image: none !important;
+    color: #1d4ed8 !important;
+    -webkit-text-fill-color: #1d4ed8 !important;
+  }
+
+  /* Mobile print adjustments */
+  @media screen and (max-width: 768px) {
+    .print-page-root,
+    .print-page-root .quotation-paper {
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .print-page-root .quotation-paper > div {
+      margin: 6mm !important;
+    }
+  }
+
+  /* iOS Safari specific print fixes */
+  @supports (-webkit-touch-callout: none) {
+    .print-page-root .quotation-paper,
+    #print-portal .quotation-paper {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    body {
+      -webkit-print-color-adjust: exact !important;
+    }
+
+    * {
+      -webkit-print-color-adjust: exact !important;
+    }
+  }
 }
 
 /* Premium company gradient text — extra line-height/padding prevents Gujarati top clip */

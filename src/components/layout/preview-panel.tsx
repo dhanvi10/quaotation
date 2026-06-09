@@ -5,9 +5,15 @@ import { Eye } from "lucide-react";
 import { QuotationPaper } from "@/components/preview/quotation-paper";
 import { useQuotationStore } from "@/store/quotation-store";
 import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
 
 export function PreviewPanel() {
   const previewZoom = useQuotationStore((s) => s.previewZoom);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -34,23 +40,25 @@ export function PreviewPanel() {
           The inner #quotation-print-root is the isolated print/PDF target —
           it must NOT have any transform applied to it directly.
         */}
-        <motion.div
-          layout
-          className="preview-zoom-wrapper mx-auto origin-top transition-transform duration-300"
-          style={{
-            transform: `scale(${previewZoom})`,
-            width: "210mm",
-            // Shrink the layout footprint so the container doesn't overflow
-            marginBottom: `calc((${previewZoom} - 1) * 297mm)`,
-          }}
-        >
-          <div className="shadow-paper rounded-sm">
-            {/* Print/PDF isolation root — no transforms inside */}
-            <div id="quotation-print-root">
-              <QuotationPaper />
+        {mounted && (
+          <motion.div
+            layout
+            className="preview-zoom-wrapper mx-auto origin-top transition-transform duration-300"
+            style={{
+              transform: `scale(${previewZoom})`,
+              width: "210mm",
+              // Shrink the layout footprint so the container doesn't overflow
+              marginBottom: `calc((${previewZoom} - 1) * 297mm)`,
+            }}
+          >
+            <div className="shadow-paper rounded-sm">
+              {/* Print/PDF isolation root — no transforms inside */}
+              <div id="quotation-print-root">
+                <QuotationPaper />
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
       </div>
     </div>
   );

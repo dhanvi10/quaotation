@@ -95,7 +95,8 @@ export function prepareCloneForCanvas(
   clonePaper.style.width = "210mm";
   clonePaper.style.minWidth = `${A4_WIDTH_PX}px`;
   clonePaper.style.maxWidth = "210mm";
-  clonePaper.style.minHeight = "297mm";
+  clonePaper.style.minHeight = "auto";
+  clonePaper.style.height = "auto";
   clonePaper.style.overflow = "visible";
   clonePaper.style.background = window.getComputedStyle(sourcePaper).background;
   clonePaper.style.margin = "0";
@@ -107,12 +108,15 @@ export function prepareCloneForCanvas(
   clonePaper.querySelectorAll<HTMLElement>(".company-gradient-text").forEach((el, idx) => {
     const src = sourcePaper.querySelectorAll<HTMLElement>(".company-gradient-text")[idx];
     if (!src) return;
+
+    // For PDF export, replace gradient with solid color
+    // html2canvas can't render text with background-clip:text + transparent color
+    el.style.backgroundImage = "none";
+    el.style.color = "#1d4ed8"; // Blue color to match theme
+    el.style.webkitTextFillColor = "#1d4ed8";
+    el.style.setProperty("-webkit-text-fill-color", "#1d4ed8");
+
     const cs = window.getComputedStyle(src);
-    el.style.backgroundImage = cs.backgroundImage;
-    el.style.backgroundClip = "text";
-    el.style.setProperty("-webkit-background-clip", "text");
-    el.style.webkitTextFillColor = "transparent";
-    el.style.color = "transparent";
     el.style.lineHeight = cs.lineHeight;
     el.style.padding = cs.padding;
     el.style.fontSize = cs.fontSize;
@@ -120,6 +124,9 @@ export function prepareCloneForCanvas(
     el.style.display = "inline-block";
     el.style.width = "auto";
     el.style.maxWidth = "100%";
+
+    // Add marker class for CSS overrides
+    el.classList.add("pdf-company-title");
   });
 
   clonePaper.querySelectorAll<HTMLElement>(".glass-location").forEach((el, idx) => {
@@ -132,6 +139,24 @@ export function prepareCloneForCanvas(
     el.style.boxShadow = cs.boxShadow;
     el.style.backdropFilter = "none";
     el.style.setProperty("-webkit-backdrop-filter", "none");
+  });
+
+  // Mirror all images from source to clone (copy src, alt, styles)
+  const sourceImages = sourcePaper.querySelectorAll<HTMLImageElement>("img");
+  const cloneImages = clonePaper.querySelectorAll<HTMLImageElement>("img");
+  sourceImages.forEach((srcImg, idx) => {
+    const cloneImg = cloneImages[idx];
+    if (!cloneImg) return;
+    // Copy image attributes
+    cloneImg.src = srcImg.src;
+    cloneImg.alt = srcImg.alt;
+    cloneImg.setAttribute("crossorigin", "anonymous");
+    // Copy image styles
+    const computedStyle = window.getComputedStyle(srcImg);
+    ["width", "height", "maxWidth", "maxHeight", "objectFit", "objectPosition"].forEach((prop) => {
+      const val = computedStyle.getPropertyValue(prop);
+      if (val) cloneImg.style.setProperty(prop, val);
+    });
   });
 
   const header = clonePaper.querySelector("header") as HTMLElement | null;
@@ -149,14 +174,35 @@ export function prepareCloneForCanvas(
 export function waitForExportReady(): Promise<void> {
   return new Promise((resolve) => {
     const done = () => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => resolve());
+      // Wait for all images to load before exporting
+      const images = Array.from(document.querySelectorAll<HTMLImageElement>("img"));
+      const imagePromises = images.map(
+        (img) =>
+          new Promise<void>((imgResolve) => {
+            if (img.complete) {
+              imgResolve();
+            } else {
+              img.onload = () => imgResolve();
+              img.onerror = () => imgResolve(); // Resolve even if load fails
+            }
+          })
+      );
+
+      Promise.all(imagePromises).then(() => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            // Extra delay for iOS Safari font rendering + Gujarati fonts
+            setTimeout(() => {
+              setTimeout(resolve, 300);
+            }, 200);
+          });
+        });
       });
     };
     if (document.fonts?.ready) {
       document.fonts.ready.then(done).catch(done);
     } else {
-      setTimeout(done, 300);
+      setTimeout(done, 500);
     }
   });
 }
